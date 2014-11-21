@@ -1,15 +1,7 @@
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include<errno.h>
+
+#include "clientSNFS.h"
 
 
 struct sockaddr_in client_addr, server_addr;
@@ -42,7 +34,7 @@ static int host2IpAddr(char *anIpName){
 }
 
 
-void setServer(char *serverIP, int port) {
+void setServer(char *serverIP, int port_num) {
     
     
     
@@ -54,11 +46,11 @@ void setServer(char *serverIP, int port) {
     if (sessionSocket < 0) error("Error creating socket");
     
     server_addr.sin_addr.s_addr = htonl(host2IpAddr(serverIP));
-    server_addr.sin_port = htons (port);
+    server_addr.sin_port = htons (port_num);
     server_addr.sin_family = AF_INET;
     
     
-    int t = connect (sock, (struct sockaddr *)&server_addr, sizeof (server_addr));
+    int t = connect (sessionSocket, (struct sockaddr *)&server_addr, sizeof (server_addr));
     
     if (t < 0) error("Connection failed");
     
@@ -73,6 +65,8 @@ int openFile(char *name) {
     
     close(sessionSocket);
     
+    
+    return 0;
 }
 
 int readFile(int fd, void *buf) {
@@ -99,11 +93,5 @@ int closeFile(int fd) {
     
 }
 
-
-int main(int argc, char *argv[]) {
-
-    
-    return 0;
-}
 
 

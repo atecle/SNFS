@@ -9,7 +9,19 @@
 #ifndef _serverSNFS_h
 #define _serverSNFS_h
 
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
 
 struct fileStat {
     

@@ -1,14 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <sys/time.h>
-#include <errno.h>
+#include "serverSNFS.h"
 
 int port;
 char *root_path;
@@ -89,8 +79,17 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     
+    int status;
     
-    int serverSocket, clilen;
+    if ((status = mkdir(root_path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)) == -1) {
+        fprintf(stderr, "Directory already exists\n");
+        exit(1);
+    }
+    
+    exit(0);
+    
+    
+    int serverSocket, clilen, true = 1;
     char hostname[32];
     
     gethostname(hostname, 32);
@@ -102,19 +101,22 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     
+    if (setsockopt(serverSocket, SOL_SOCKET, SO_REUSEPORT, &true, sizeof(int)) == -1) error("Error in setsockopt()");
+    
    
     
     struct sockaddr_in server_addr, client_addr;
     
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(port);
-    server_addr.sin_addr.s_addr =  htonl(host2IpAddr (hostname));
+    server_addr.sin_addr.s_addr =  INADDR_ANY; //htonl(host2IpAddr (hostname));
     bzero(&(server_addr.sin_zero), 8);
+    
     
     if(bind(serverSocket, (struct sockaddr*)&server_addr, sizeof(struct sockaddr_in))) error("Error binding socket");
     
     
-    if (listen(sock, 5) == -1) error("Error in listen()");
+    if (listen(serverSocket, 5) == -1) error("Error in listen()");
     
     fflush(stdout);
     
@@ -123,8 +125,8 @@ int main(int argc, char *argv[]) {
         clilen = sizeof(client_addr);
         //int *connection = (int*)malloc(sizeof(int));
         int conn;
-        conn = accept (serverSocket, (struct sockaddr *)&client_addr, &clilen);
-        //if (*connection < 0) error("Error in accept()");
+        conn = accept(serverSocket, (struct sockaddr *)&client_addr, (socklen_t * __restrict) &clilen);
+        if (conn < 0) error("Error in accept()");
         handle_request(&conn);                          // here is where you would spawn a thread
         
     }
